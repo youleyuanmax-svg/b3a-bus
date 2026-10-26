@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="B3A bus to Shenzhen Bay Port">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12a89d"/>
+      <stop offset="1" stop-color="#0e5c8a"/>
+    </linearGradient>
+    <clipPath id="round"><rect width="512" height="512" rx="112"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#round)">
+    <rect width="512" height="512" fill="url(#g)"/>
+    <circle cx="436" cy="76" r="120" fill="#ffffff" opacity="0.07"/>
+    <circle cx="70" cy="452" r="150" fill="#ffffff" opacity="0.06"/>
+
+    <!-- bus body -->
+    <rect x="88" y="152" width="336" height="192" rx="42" fill="#ffffff"/>
+    <!-- windows -->
+    <rect x="120" y="184" width="272" height="88" rx="22" fill="#0e5c8a"/>
+    <rect x="204" y="184" width="15" height="88" fill="#ffffff"/>
+    <rect x="293" y="184" width="15" height="88" fill="#ffffff"/>
+    <!-- skirt / bumper -->
+    <rect x="88" y="292" width="336" height="52" rx="26" fill="#dde8f4"/>
+    <!-- headlight -->
+    <rect x="114" y="306" width="48" height="22" rx="11" fill="#ffc93c"/>
+    <!-- wheels -->
+    <circle cx="176" cy="342" r="44" fill="#12232e"/>
+    <circle cx="176" cy="342" r="18" fill="#ffffff"/>
+    <circle cx="336" cy="342" r="44" fill="#12232e"/>
+    <circle cx="336" cy="342" r="18" fill="#ffffff"/>
+  </g>
+</svg>
