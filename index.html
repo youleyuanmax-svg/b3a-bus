@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>富泰邨 ⇄ 深圳灣口岸 巴士 | Fu Tai Estate ⇄ Shenzhen Bay Port</title>
+<meta name="description" content="城巴 B3A 由富泰邨往深圳灣口岸的實時到站時間及班次時間表">
+
+<!-- installable app (PWA) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b7a75">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="B3A 富泰">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+  :root{
+    --bg:#eef2f7; --card:#ffffff; --ink:#1b2430;
+    --muted:#697586; --line:#dde5ee; --brand:#0b7a75; --brand2:#0e5c8a;
+    --accent:#e8590c; --ok:#12805c; --warn:#b45309;
+    --shadow:0 1px 2px rgba(16,32,48,.06), 0 8px 24px rgba(16,32,48,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 14px calc(64px + env(safe-area-inset-bottom,0px))}
+  [hidden]{display:none !important}
+
+  button.install{
+    background:#fff;color:var(--brand2);border:0;border-radius:999px;
+    padding:7px 14px;font-size:.78rem;font-weight:800;cursor:pointer;white-space:nowrap
+  }
+  .install-hint{
+    background:#e8f3f2;border:1px solid #bfe0dd;color:#0b5c58;border-radius:12px;
+    padding:10px 12px;font-size:.82rem;margin-top:14px;display:flex;gap:10px;align-items:flex-start
+  }
+  .install-hint button{
+    margin-left:auto;background:transparent;border:0;color:#0b5c58;font-size:1rem;
+    font-weight:800;cursor:pointer;line-height:1;padding:2px 4px
+  }
+
+  /* ---------- header ---------- */
+  header.hero{
+    background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);
+    color:#fff;padding:calc(22px + env(safe-area-inset-top,0px)) 0 26px;margin-bottom:-14px;
+  }
+  .hero .wrap{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  .hero h1{font-size:1.32rem;margin:0;font-weight:800;letter-spacing:.2px}
+  .hero .sub{font-size:.82rem;opacity:.9;margin-top:3px;font-weight:500}
+  .operator{
+    display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 12px;font-size:.78rem;font-weight:700
+  }
+  .route-chip{background:#fff;color:var(--brand2);border-radius:8px;padding:2px 8px;font-weight:900;font-size:.82rem}
+
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto}
+  .seg{display:inline-flex;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;overflow:hidden}
+  .seg button{
+    background:transparent;color:#fff;border:0;padding:6px 12px;font-size:.78rem;font-weight:700;cursor:pointer
+  }
+  .seg button.on{background:#fff;color:var(--brand2)}
+
+  /* ---------- generic card ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .card h2{font-size:1rem;margin:0;font-weight:800}
+  .card .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .card .bd{padding:14px 16px}
+
+  section{margin-top:18px}
+  .sec-title{font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 2px 8px}
+
+  /* ---------- live cards ---------- */
+  .live{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.live{grid-template-columns:1fr}}
+  .dir{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem}
+  .pill{font-size:.7rem;font-weight:800;border-radius:999px;padding:2px 9px;background:#e8f3f2;color:var(--brand);white-space:nowrap}
+  .pill.ret{background:#fdece2;color:var(--accent)}
+  .eta-main{display:flex;align-items:baseline;gap:12px;margin:6px 0 4px}
+  .eta-min{font-size:3rem;font-weight:900;line-height:1;letter-spacing:-1px}
+  .eta-min small{font-size:1rem;font-weight:800;margin-left:3px}
+  .eta-when{color:var(--muted);font-size:.86rem;font-weight:600}
+  .due{color:var(--ok)}
+  .soon{color:var(--accent)}
+  .eta-list{margin:10px 0 0;padding:0;list-style:none;border-top:1px dashed var(--line)}
+  .eta-list li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:.88rem;border-bottom:1px dashed var(--line)}
+  .eta-list li:last-child{border-bottom:0}
+  .eta-list .t{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+  .eta-list .m{font-weight:800;font-variant-numeric:tabular-nums}
+  .rmk{color:var(--warn);font-weight:700;font-size:.78rem}
+  .status{font-size:.82rem;color:var(--muted);margin-top:10px}
+  .status.err{color:#b91c1c}
+  .skeleton{height:44px;border-radius:10px;background:linear-gradient(90deg,#eef2f7,#e2e9f1,#eef2f7);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  .meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:.82rem;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:800}
+
+  /* ---------- buttons ---------- */
+  button.btn{
+    background:var(--brand);color:#fff;border:0;border-radius:10px;padding:8px 14px;
+    font-size:.82rem;font-weight:800;cursor:pointer
+  }
+  button.btn.ghost{background:#eef2f7;color:var(--ink);border:1px solid var(--line)}
+  button.btn:active{transform:translateY(1px)}
+
+  /* ---------- timetable ---------- */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .tabs button{
+    background:#eef2f7;border:1px solid var(--line);color:var(--ink);border-radius:999px;
+    padding:6px 12px;font-size:.8rem;font-weight:700;cursor:pointer
+  }
+  .tabs button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tt-cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media(max-width:720px){.tt-cols{grid-template-columns:1fr}}
+  .tt-col{padding:14px 16px}
+  .tt-col + .tt-col{border-left:1px solid var(--line)}
+  @media(max-width:720px){.tt-col + .tt-col{border-left:0;border-top:1px solid var(--line)}}
+  .tt-col h3{font-size:.9rem;margin:0 0 2px;font-weight:800}
+  .tt-col .note{font-size:.74rem;color:var(--muted);margin:0 0 10px}
+  .times{display:flex;flex-wrap:wrap;gap:5px}
+  .times span{
+    font-variant-numeric:tabular-nums;font-size:.78rem;font-weight:700;
+    background:#f4f7fb;border:1px solid var(--line);border-radius:7px;padding:3px 7px;color:#33414f
+  }
+  .times span.past{opacity:.34}
+  .times span.next{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 3px rgba(11,122,117,.15)}
+  .est{color:var(--warn)}
+
+  /* ---------- stops ---------- */
+  .stops{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media(max-width:720px){.stops{grid-template-columns:1fr}}
+  .stops .col{padding:14px 16px}
+  .stops .col + .col{border-left:1px solid var(--line)}
+  @media(max-width:720px){.stops .col + .col{border-left:0;border-top:1px solid var(--line)}}
+  ol.stoplist{margin:0;padding-left:0;list-style:none;counter-reset:s}
+  ol.stoplist li{
+    counter-increment:s;position:relative;padding:6px 0 6px 30px;font-size:.84rem;border-bottom:1px dashed var(--line)
+  }
+  ol.stoplist li:last-child{border-bottom:0}
+  ol.stoplist li::before{
+    content:counter(s);position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;
+    background:#eef2f7;color:var(--muted);font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center
+  }
+  ol.stoplist li.key::before{background:var(--brand);color:#fff}
+  ol.stoplist li.key{font-weight:800}
+  ol.stoplist li .rd{color:var(--muted);font-weight:500;font-size:.78rem}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:.86rem}
+  .kv dt{color:var(--muted);font-weight:600}
+  .kv dd{margin:0;font-weight:700}
+
+  .callout{
+    background:#fff8ec;border:1px solid #f4dcb2;border-left:4px solid var(--warn);
+    border-radius:12px;padding:12px 14px;font-size:.83rem;color:#5b3b06;margin-top:16px
+  }
+  .callout b{color:#3f2903}
+
+  footer{margin-top:26px;font-size:.78rem;color:var(--muted)}
+  footer a{color:var(--brand2)}
+  footer ul{margin:8px 0 0;padding-left:18px}
+  footer li{margin:4px 0}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1 id="t-title">富泰邨 ⇄ 深圳灣口岸 巴士</h1>
+      <div class="sub" id="t-sub">城巴 B3A · 經富泰邨 直達深圳灣口岸</div>
+    </div>
+    <div class="toolbar">
+      <span class="operator"><span class="route-chip">B3A</span> Citybus 城巴</span>
+      <button class="install" id="install" type="button" hidden>⬇ 安裝為 App</button>
+      <div class="seg" role="group" aria-label="Language">
+        <button id="lang-tc" class="on" type="button">中文</button>
+        <button id="lang-en" type="button">EN</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="install-hint" id="install-hint" hidden>
+    <span id="install-hint-text"></span>
+    <button type="button" id="install-hint-x" aria-label="close">✕</button>
+  </div>
+
+  <!-- LIVE -->
+  <section>
+    <p class="sec-title" id="t-live-title">實時到站</p>
+    <div class="live">
+
+      <div class="card">
+        <div class="hd">
+          <span class="dir"><span class="pill">→ 深圳灣口岸</span></span>
+          <span id="t-out-board" style="font-size:.8rem;color:var(--muted)">富泰邨, 青山公路 上車</span>
+        </div>
+        <div class="bd">
+          <div id="out-body"><div class="skeleton"></div></div>
+          <div class="status" id="out-status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <span class="dir"><span class="pill ret">→ 屯門 / 山景邨</span></span>
+          <span id="t-in-board" style="font-size:.8rem;color:var(--muted)">深圳灣口岸 開出後經富泰商場</span>
+        </div>
+        <div class="bd">
+          <div id="in-body"><div class="skeleton"></div></div>
+          <div class="status" id="in-status"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="meta" style="margin-top:10px">
+      <div><b id="clock">--:--</b> <span id="t-hk">香港時間</span></div>
+      <div><span id="t-updated">更新</span>: <b id="updated">--</b></div>
+      <button class="btn ghost" id="refresh" type="button">↻ 立即更新</button>
+    </div>
+  </section>
+
+  <!-- TIMETABLE -->
+  <section>
+    <p class="sec-title" id="t-tt-title">班次時間表</p>
+    <div class="card">
+      <div class="tabs" id="tabs"></div>
+      <div class="tt-cols">
+        <div class="tt-col">
+          <h3 id="t-tt-out">富泰邨 → 深圳灣口岸</h3>
+          <p class="note" id="t-tt-out-note"></p>
+          <div class="times" id="tt-out"></div>
+        </div>
+        <div class="tt-col">
+          <h3 id="t-tt-in">深圳灣口岸 → 富泰商場</h3>
+          <p class="note" id="t-tt-in-note"></p>
+          <div class="times" id="tt-in"></div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" id="t-tt-callout"></div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section>
+    <p class="sec-title" id="t-journey">行程資料</p>
+    <div class="card">
+      <div class="bd">
+        <dl class="kv">
+          <dt id="t-op">營辦商</dt><dd>Citybus 城巴 (B3A) · 熱線 2136 8888</dd>
+          <dt id="t-fare">車費 (富泰邨往深圳灣口岸)</dt><dd>$13.6 · <span id="t-child">小童/長者 $6.8</span></dd>
+          <dt id="t-fare2">回程車費 (深圳灣口岸往富泰商場)</dt><dd>$13.6 <span id="t-octopus">($13.6 分段只適用於八達通)</span></dd>
+          <dt id="t-jt">預計車程</dt><dd id="t-jt-val"></dd>
+          <dt id="t-hours">服務時間</dt><dd id="t-hours-val"></dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- STOPS -->
+  <section>
+    <p class="sec-title" id="t-stops-title">沿途車站</p>
+    <div class="card">
+      <div class="stops">
+        <div class="col">
+          <h3 style="font-size:.9rem;margin:0 0 8px" id="t-stops-out">往 深圳灣口岸</h3>
+          <ol class="stoplist" id="stops-out"></ol>
+        </div>
+        <div class="col">
+          <h3 style="font-size:.9rem;margin:0 0 8px" id="t-stops-in">往 山景邨</h3>
+          <ol class="stoplist" id="stops-in"></ol>
+        </div>
+      </div>
+    </div>
+    <div class="callout" id="t-closed"></div>
+  </section>
+
+  <footer>
+    <strong id="t-src">資料來源（香港政府及城巴官方）</strong>
+    <ul>
+      <li><a href="https://www.td.gov.hk/en/transport_in_hong_kong/land_based_cross_boundary_transport/access_to_shenzhen_bay_port/index.html" target="_blank" rel="noopener">運輸署 — 往來深圳灣口岸的公共交通服務</a></li>
+      <li><a href="https://www.td.gov.hk/tc/traffic_notices/index_id_86689.html" target="_blank" rel="noopener">運輸署交通通告：城巴 B3A 號線加強服務（2026 年 5 月 18 日起）</a></li>
+      <li><a href="https://rt.data.gov.hk/v2/transport/citybus/route/CTB/B3A" target="_blank" rel="noopener">DATA.GOV.HK 城巴實時到站 API（rt.data.gov.hk）</a></li>
+      <li><a href="https://www.gov.hk/tc/about/abouthk/holiday/2026.htm" target="_blank" rel="noopener">香港 2026 年公眾假期</a></li>
+    </ul>
+    <p id="t-disclaimer" style="margin-top:10px"></p>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. OFFICIAL DATA
+   ============================================================ */
+
+/* Official schedule (frequency bands, minutes headway).
+   Weekday bands  : Transport Department traffic notice, eff. 18 May 2026.
+   Sat / Sun bands: Citybus published route info.                        */
+
+/* From Shan King Estate (山景邨開) — origin of route B3A */
+const SRC_OUT = {
+  weekday: {                        // Mon–Fri, school day
+    singles: [],
+    bands: [["06:00","07:00",30],["07:00","07:40",20],["07:40","07:55",15],
+            ["07:55","08:55",20],["08:55","09:45",25],["09:45","15:45",30],
+            ["15:45","16:15",15],["16:15","19:45",30],["19:45","20:20",35],
+            ["20:20","22:20",30]]
+  },
+  weekdayHol: {                     // Mon–Fri, school holiday
+    singles: [],
+    bands: [["06:00","07:00",30],["07:00","07:40",20],["07:40","07:55",15],
+            ["07:55","08:55",20],["08:55","09:45",25],["09:45","19:45",30],
+            ["19:45","20:20",35],["20:20","22:20",30]]
+  },
+  sat: {
+    singles: ["06:00","08:05","19:30"],
+    bands: [["06:45","07:45",20],["08:20","12:05",15],["12:05","13:45",20],
+            ["13:45","18:45",30],["20:15","22:15",60]]
+  },
+  sun: {
+    singles: ["06:00","19:30"],
+    bands: [["06:45","08:05",20],["08:05","12:05",15],["12:05","13:45",20],
+            ["13:45","18:45",30],["20:15","22:15",60]]
+  }
+};
+
+/* From Shenzhen Bay Port (深圳灣口岸開) */
+const SRC_IN = {
+  weekday: {
+    singles: ["06:50","07:15"],
+    bands: [["07:45","08:55",35],["08:55","09:55",20],["09:55","10:45",25],
+            ["10:45","16:15",30],["16:15","18:15",20],["18:15","23:15",30],
+            ["23:15","23:35",20]]
+  },
+  weekdayHol: {
+    singles: ["06:50","07:15"],
+    bands: [["07:45","08:55",35],["08:55","09:55",20],["09:55","10:45",25],
+            ["10:45","16:15",30],["16:15","18:15",20],["18:15","23:15",30],
+            ["23:15","23:35",20]]
+  },
+  sat: {
+    singles: ["06:50"],
+    bands: [["07:15","20:15",30],["20:15","22:35",20],["22:35","23:35",30]]
+  },
+  sun: {
+    singles: ["06:50"],
+    bands: [["07:15","16:15",30],["16:15","19:15",20],["19:15","22:15",15],
+            ["22:15","23:35",20]]
+  }
+};
+
+/* Minutes a bus needs from the published origin to the Fu Tai corner.
+   Outbound (山景邨 → 富泰邨) measured from the official live-ETA feed. */
+const OFFSET_OUT = 27;   // Shan King Estate  → Fu Tai Estate (003261)
+const OFFSET_IN  = 14;   // Shenzhen Bay Port  → Fu Tai Shopping Centre (003262)
+
+/* Stops (from official DATA.GOV.HK Citybus API, 18 Oct 2026) */
+const STOPS_OUT = [
+  ["山景邨景麗樓","King Lai House, Shan King Estate","石排頭路"],
+  ["大興變電站","Tai Hing Substation","石排頭路"],
+  ["台山商會小學","Toi Shan Association Primary School","石排頭路"],
+  ["大興體育館","Tai Hing Sports Centre","震寰路"],
+  ["大興北休憩處","Tai Hing North Sitting-out Area","青田路"],
+  ["新圍苑","San Wai Court","田景路"],
+  ["兆邦苑","Siu Pong Court","田景路"],
+  ["寶田邨","Po Tin Estate","鳴琴路"],
+  ["和田邨","Wo Tin Estate","興貴街"],
+  ["NOVO LAND","NOVO LAND","欣寶路"],
+  ["紫田村","Tsz Tin Tsuen","欣寶路"],
+  ["欣田邨","Yan Tin Estate","青麟路"],
+  ["五柳路","Ng Lau Road","藍地交匯處"],
+  ["富泰邨","Fu Tai Estate","青山公路"],
+  ["深圳灣口岸","Shenzhen Bay Port","深圳灣口岸公共運輸交匯處"]
+];
+const STOPS_IN = [
+  ["深圳灣口岸","Shenzhen Bay Port","深圳灣口岸公共運輸交匯處"],
+  ["富泰商場","Fu Tai Shopping Centre","青山公路"],
+  ["五柳路","Ng Lau Road","藍地交匯處"],
+  ["欣田邨","Yan Tin Estate","青麟路"],
+  ["菁田邨","Ching Tin Estate","欣寶路"],
+  ["NOVO LAND","NOVO LAND","欣寶路"],
+  ["和田邨","Wo Tin Estate","興貴街"],
+  ["盈豐園","Goodrich Garden","鳴琴路"],
+  ["良景邨","Leung King Estate","田景路"],
+  ["田景邨田裕樓","Tin Yue House, Tin King Estate","田景路"],
+  ["建生邨樂生樓","Lok Sang House, Kin Sang Estate","青田路"],
+  ["大興體育館","Tai Hing Sports Centre","震寰路"],
+  ["翠林花園","Greenland Garden","石排頭路"],
+  ["山景邨景麗樓","King Lai House, Shan King Estate","石排頭路"]
+];
+
+/* HK general holidays 2026 (GovHK) — auto day-type detection */
+const HOLIDAYS_2026 = {
+  "2026-01-01":"一月一日 / The first day of January",
+  "2026-02-17":"農曆年初一 / Lunar New Year's Day",
+  "2026-02-18":"農曆年初二 / The second day of Lunar New Year",
+  "2026-02-19":"農曆年初三 / The third day of Lunar New Year",
+  "2026-04-03":"耶穌受難節 / Good Friday",
+  "2026-04-04":"耶穌受難節翌日 / The day following Good Friday",
+  "2026-04-06":"清明節翌日 / The day following Ching Ming Festival",
+  "2026-04-07":"復活節星期一翌日 / The day following Easter Monday",
+  "2026-05-01":"勞動節 / Labour Day",
+  "2026-05-25":"佛誕翌日 / The day following the Birthday of the Buddha",
+  "2026-06-19":"端午節 / Tuen Ng Festival",
+  "2026-07-01":"香港特別行政區成立紀念日 / HKSAR Establishment Day",
+  "2026-09-26":"中秋節翌日 / The day following the Chinese Mid-Autumn Festival",
+  "2026-10-01":"國慶日 / National Day",
+  "2026-10-19":"重陽節翌日 / The day following Chung Yeung Festival",
+  "2026-12-25":"聖誕節 / Christmas Day",
+  "2026-12-26":"聖誕節後第一個周日 / The first weekday after Christmas Day"
+};
+
+/* Official live-ETA API (DATA.GOV.HK) */
+const API = {
+  stopOut: "003261",   // 富泰邨, 青山公路   (outbound board)
+  stopIn : "003262",   // 富泰商場, 青山公路 (inbound alight)
+  destOut: "深圳灣口岸",
+  destIn : "山景邨",
+  url: (stop) => `https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/${stop}/B3A`
+};
+
+/* ============================================================
+   2. i18n
+   ============================================================ */
+const I18N = {
+  tc: {
+    title:"富泰邨 ⇄ 深圳灣口岸 巴士",
+    sub:"城巴 B3A · 經富泰邨 直達深圳灣口岸",
+    liveTitle:"實時到站",
+    outBoard:"富泰邨, 青山公路 上車",
+    inBoard:"深圳灣口岸開出 → 抵達富泰商場時間",
+    hk:"香港時間", updated:"更新", refresh:"↻ 立即更新",
+    ttTitle:"班次時間表",
+    ttOut:"富泰邨 → 深圳灣口岸",
+    ttIn:"深圳灣口岸 → 富泰商場",
+    ttOutNote:"富泰邨預計開出時間（官方班次推算）",
+    ttInNote:"深圳灣口岸官方開出時間 · 到富泰商場約 +14 分鐘",
+    journey:"行程資料",
+    op:"營辦商", fare:"車費 (富泰邨往深圳灣口岸)", child:"小童/長者 $6.8",
+    fare2:"回程車費 (深圳灣口岸往富泰商場)", octopus:"（分段收費 $13.6 只適用於八達通）",
+    jt:"預計車程", hours:"服務時間",
+    jtVal:"富泰邨 → 深圳灣口岸：約 15 分鐘 · 全程（山景邨開）約 42 分鐘",
+    hoursVal:"班次由山景邨早上 6:00 開出至晚上約 10:20；深圳灣口岸由早上 6:50 開出至晚上 11:35",
+    stopsTitle:"沿途車站", stopsOut:"往 深圳灣口岸", stopsIn:"往 山景邨",
+    noService:"現時沒有班次",
+    min:"分鐘", due:"即將到站", now:"現在",
+    installBtn:"⬇ 安裝為 App",
+    iosHint:"加到主畫面，就可以像 App 一樣使用：點下方工具列的「分享」鍵 ⬆，再選「加入主畫面」。",
+    dayTypes:{weekday:"平日（上課日）", weekdayHol:"平日（學校假期）", sat:"星期六", sun:"星期日及公眾假期"},
+    closed:"<b>注意：</b>深圳灣口岸（港方口岸區）屬邊境禁區，過境旅客須持有有效旅遊證件；非過境人士須持有有效禁區通行證。口岸每日開放時間為 06:30 – 24:00，公路會於口岸停止運作前約 30 分鐘封閉；深圳灣公路大橋在惡劣天氣下可能封閉，屆時巴士服務或會停止。",
+    disclaimer:"本應用程式的實時到站時間來自香港政府 DATA.GOV.HK 城巴 API，時間表來自運輸署交通通告及城巴官方資料。資料僅供參考，或會因交通情況而變更，恕不另行通知；實際開車時間請以實時到站資料及現場公布為準。"
+  },
+  en: {
+    title:"Fu Tai Estate ⇄ Shenzhen Bay Port Bus",
+    sub:"Citybus B3A · from Fu Tai Estate direct to Shenzhen Bay Port",
+    liveTitle:"Live arrivals",
+    outBoard:"Board: Fu Tai Estate, Castle Peak Road",
+    inBoard:"Leaves the Port → arrival time at Fu Tai Shopping Centre",
+    hk:"Hong Kong time", updated:"Updated", refresh:"↻ Refresh now",
+    ttTitle:"Timetable",
+    ttOut:"Fu Tai Estate → Shenzhen Bay Port",
+    ttIn:"Shenzhen Bay Port → Fu Tai",
+    ttOutNote:"Estimated Fu Tai Estate departures (derived from official schedule)",
+    ttInNote:"Official departures from the Port · reach Fu Tai ≈ +14 min",
+    journey:"Journey information",
+    op:"Operator", fare:"Fare (Fu Tai Estate → Shenzhen Bay Port)", child:"Child / Senior $6.8",
+    fare2:"Return fare (Port → Fu Tai)", octopus:"(section fare $13.6 applies to Octopus only)",
+    jt:"Journey time", hours:"Service hours",
+    jtVal:"Fu Tai Estate → Port: about 15 min · full route (ex Shan King) about 42 min",
+    hoursVal:"First bus leaves Shan King Estate at 6:00 am, last about 10:20 pm; first bus leaves the Port at 6:50 am, last 11:35 pm",
+    stopsTitle:"Stops", stopsOut:"To Shenzhen Bay Port", stopsIn:"To Shan King Estate",
+    noService:"No service right now",
+    min:"min", due:"Arriving", now:"now",
+    installBtn:"⬇ Install app",
+    iosHint:"Add to Home Screen to use it like an app: tap the Share button ⬆ below, then “Add to Home Screen”.",
+    dayTypes:{weekday:"Mon–Fri (school day)", weekdayHol:"Mon–Fri (school holiday)", sat:"Saturday", sun:"Sunday & public holiday"},
+    closed:"<b>Note:</b> The Hong Kong Port Area of Shenzhen Bay Port is a Closed Area — cross-boundary travellers need a valid travel document, others a Closed Area Permit. The Port opens 06:30–24:00; roads close about 30 minutes before it stops operating. The Shenzhen Bay Bridge may close in bad weather and bus services may stop.",
+    disclaimer:"Live arrival times come from the Hong Kong Government DATA.GOV.HK Citybus API; the timetable comes from Transport Department traffic notices and Citybus official route information. Information is for reference only and may change without notice — always rely on the live arrivals and on-site information."
+  }
+};
+
+/* ============================================================
+   3. Helpers
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const toMin = (t) => { const [h,m] = t.split(":").map(Number); return h*60+m; };
+const pad2  = (n) => String(n).padStart(2,"0");
+const fmt   = (m) => { m = ((m%1440)+1440)%1440; return pad2(Math.floor(m/60))+":"+pad2(m%60); };
+
+function expand(spec){
+  const set = new Set();
+  (spec.singles||[]).forEach(t => set.add(toMin(t)));
+  (spec.bands||[]).forEach(([f,t,e]) => {
+    for(let x = toMin(f); x <= toMin(t); x += e) set.add(x);
+  });
+  return [...set].sort((a,b)=>a-b);
+}
+
+function hkNow(){
+  // Current date/time in Hong Kong, regardless of the device timezone.
+  const parts = new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Hong_Kong", year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false, weekday:"short"
+  }).formatToParts(new Date());
+  const g = k => parts.find(p=>p.type===k)?.value ?? "";
+  return {
+    date:`${g("year")}-${g("month")}-${g("day")}`,
+    hhmm:Number(g("hour"))*60 + Number(g("minute")),
+    sec:Number(g("second")),
+    text:`${g("hour")}:${g("minute")}:${g("second")}`,
+    wd:g("weekday")
+  };
+}
+
+function autoDayType(){
+  const {date, wd} = hkNow();
+  if(HOLIDAYS_2026[date]) return "sun";
+  if(wd === "Sat") return "sat";
+  if(wd === "Sun") return "sun";
+  return "weekday";
+}
+
+/* ============================================================
+   4. State + render
+   ============================================================ */
+const state = { lang:"tc", day: autoDayType(), live:{out:null,in:null}, err:{out:null,in:null} };
+
+function T(){ return I18N[state.lang]; }
+
+function renderStatic(){
+  const t = T();
+  $("t-title").textContent = t.title;
+  $("t-sub").textContent = t.sub;
+  $("t-live-title").textContent = t.liveTitle;
+  $("t-out-board").textContent = t.outBoard;
+  $("t-in-board").textContent = t.inBoard;
+  $("t-hk").textContent = t.hk;
+  $("t-updated").textContent = t.updated;
+  $("refresh").textContent = t.refresh;
+  $("t-tt-title").textContent = t.ttTitle;
+  $("t-tt-out").textContent = t.ttOut;
+  $("t-tt-in").textContent = t.ttIn;
+  $("t-tt-out-note").textContent = t.ttOutNote;
+  $("t-tt-in-note").textContent = t.ttInNote;
+  $("t-journey").textContent = t.journey;
+  $("t-op").textContent = t.op;
+  $("t-fare").textContent = t.fare;
+  $("t-child").textContent = t.child;
+  $("t-fare2").textContent = t.fare2;
+  $("t-octopus").textContent = t.octopus;
+  $("t-jt").textContent = t.jt;
+  $("t-jt-val").textContent = t.jtVal;
+  $("t-hours").textContent = t.hours;
+  $("t-hours-val").textContent = t.hoursVal;
+  $("t-stops-title").textContent = t.stopsTitle;
+  $("t-stops-out").textContent = t.stopsOut;
+  $("t-stops-in").textContent = t.stopsIn;
+  $("t-closed").innerHTML = t.closed;
+  $("t-disclaimer").textContent = t.disclaimer;
+  $("t-tt-callout").innerHTML = state.lang==="tc"
+    ? "<b>為何富泰邨的時間是「預計」？</b>官方時間表以<b>山景邨</b>為總站開出；富泰邨為去程第 14 個站（倒數第二站），故上述時間為「山景邨開出時間 + 約 27 分鐘」的推算。城巴亦會按需求加開由<b>富泰邨</b>直接開出的特別班次，未必反映在時間表上——請以上方<b>實時到站</b>為準。"
+    : "<b>Why are the Fu Tai Estate times “estimated”?</b> The official timetable departs from <b>Shan King Estate</b>; Fu Tai Estate is stop 14 of 15 outbound, so the times above are “Shan King departure + about 27 minutes”. Citybus may also add special departures starting at <b>Fu Tai Estate</b> which are not shown in the timetable — please rely on the <b>live arrivals</b> above.";
+  $("t-live-title").textContent = t.liveTitle;
+  document.title = state.lang==="tc"
+    ? "富泰邨 ⇄ 深圳灣口岸 巴士 | Citybus B3A"
+    : "Fu Tai Estate ⇄ Shenzhen Bay Port Bus | Citybus B3A";
+  document.documentElement.lang = state.lang==="tc" ? "zh-Hant" : "en";
+  $("lang-tc").classList.toggle("on", state.lang==="tc");
+  $("lang-en").classList.toggle("on", state.lang==="en");
+  $("install").textContent = t.installBtn;
+  $("install-hint-text").textContent = t.iosHint;
+}
+
+function renderTabs(){
+  const t = T(), tabs = $("tabs");
+  const order = ["weekday","weekdayHol","sat","sun"];
+  tabs.innerHTML = order.map(k =>
+    `<button type="button" data-day="${k}" class="${state.day===k?"on":""}">${t.dayTypes[k]}</button>`
+  ).join("");
+  tabs.querySelectorAll("button").forEach(b =>
+    b.addEventListener("click", () => { state.day = b.dataset.day; renderTabs(); renderTimetable(); })
+  );
+}
+
+function renderTimetable(){
+  const now = hkNow();
+  const outOrigin = expand(SRC_OUT[state.day]);
+  const inOrigin  = expand(SRC_IN[state.day]);
+  const outTimes  = outOrigin.map(m => m + OFFSET_OUT);
+  const inTimes   = inOrigin;                     // port departures (official)
+  const inArrive  = inOrigin.map(m => m + OFFSET_IN); // reaching Fu Tai (estimated)
+
+  const nextOut = outTimes.find(m => m >= now.hhmm - 1);
+  const nextIn  = inTimes.find(m => m >= now.hhmm - 1);
+
+  $("tt-out").innerHTML = outTimes.map(m => {
+    const cls = (m < now.hhmm - 1) ? "past" : (m === nextOut ? "next" : "");
+    return `<span class="${cls}">${fmt(m)}</span>`;
+  }).join("");
+
+  $("tt-in").innerHTML = inTimes.map((m,i) => {
+    const cls = (m < now.hhmm - 1) ? "past" : (m === nextIn ? "next" : "");
+    const est = inArrive[i];
+    const label = state.lang==="tc"
+      ? `${fmt(m)} <small class="est">(富泰商場 ${fmt(est)})</small>`
+      : `${fmt(m)} <small class="est">(Fu Tai ${fmt(est)})</small>`;
+    return `<span class="${cls}">${label}</span>`;
+  }).join("");
+}
+
+/* ---- live ETA cards ---- */
+function etaCard(list, statusEl, lang, dir){
+  const t = T();
+  if(!list || !list.length){
+    statusEl.className = "status err";
+    statusEl.textContent = t.noService;
+    return "";
+  }
+  const nowMs = Date.now();
+  const rows = list.slice(0,3).map(e => {
+    const d = new Date(e.eta);
+    const mins = Math.max(0, Math.round((d - nowMs)/60000));
+    const hhmm = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Hong_Kong",hour:"2-digit",minute:"2-digit",hour12:false}).format(d);
+    return {mins, hhmm, rmk: lang==="tc" ? (e.rmk_tc||"") : (e.rmk_en||"")};
+  });
+  const head = rows[0];
+  const cls = head.mins <= 1 ? "due" : (head.mins <= 4 ? "soon" : "");
+  const headTxt = head.mins <= 0 ? t.due : `${head.mins}<small>${t.min}</small>`;
+
+  const rest = rows.slice(1).map(r =>
+    `<li><span class="t">${r.hhmm}</span><span class="m">${r.mins<=0?t.due:r.mins+" "+t.min}${r.rmk?` <span class="rmk">${r.rmk}</span>`:""}</span></li>`
+  ).join("");
+
+  statusEl.className = "status";
+  statusEl.textContent = "";
+  return `
+    <div class="eta-main">
+      <div class="eta-min ${cls}">${headTxt}</div>
+      <div class="eta-when">${head.hhmm}${head.rmk?`<br><span class="rmk">${head.rmk}</span>`:""}</div>
+    </div>
+    ${rest?`<ul class="eta-list">${rest}</ul>`:""}`;
+}
+
+/* Fetch one stop's live ETA. Direct call first; when the page is opened
+   straight from disk (file://) some browsers refuse the cross-origin call,
+   so we transparently retry through a read-only public CORS proxy. */
+async function fetchEta(stop){
+  const u = API.url(stop);
+  try{
+    const r = await fetch(u, {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return await r.json();
+  }catch(err){
+    if(location.protocol === "file:"){
+      const r2 = await fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(u), {cache:"no-store"});
+      if(!r2.ok) throw err;
+      state.viaProxy = true;
+      return await r2.json();
+    }
+    throw err;
+  }
+}
+
+async function loadLive(){
+  const t = T();
+  state.viaProxy = false;
+  const jobs = [
+    fetchEta(API.stopOut).then(j=>({k:"out", j})).catch(e=>({k:"out", e})),
+    fetchEta(API.stopIn ).then(j=>({k:"in",  j})).catch(e=>({k:"in",  e}))
+  ];
+  const results = await Promise.all(jobs);
+  for(const r of results){
+    const body = $(r.k+"-body"), status = $(r.k+"-status");
+    if(r.e){
+      state.live[r.k] = null; state.err[r.k] = r.e;
+      body.innerHTML = "";
+      status.className = "status err";
+      status.textContent = state.lang==="tc"
+        ? "暫時無法取得實時到站資料（請檢查網絡後按「立即更新」）"
+        : "Live arrivals unavailable right now (check your network, then tap Refresh)";
+      $("updated").textContent = "--";
+      continue;
+    }
+    const dest = r.k==="out" ? API.destOut : API.destIn;
+    const list = (r.j.data||[]).filter(x => x.dest_tc === dest);
+    state.live[r.k] = list; state.err[r.k] = null;
+    // make sure the container has the right skeleton removed
+    body.innerHTML = etaCard(list, status, state.lang, r.k);
+    if(!list.length){
+      body.innerHTML = "";
+      status.className = "status err";
+      status.textContent = t.noService;
+    }
+  }
+  $("updated").textContent = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Hong_Kong",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date())
+    + (state.viaProxy ? (state.lang==="tc" ? " (經代理)" : " (via proxy)") : "");
+}
+
+function tickClock(){
+  $("clock").textContent = hkNow().text;
+}
+
+/* ============================================================
+   5. Stops list
+   ============================================================ */
+function renderStops(){
+  const lang = state.lang;
+  const build = (list, keyIdx, keyIdx2) => list.map((s,i) => {
+    const key = (i===keyIdx || i===keyIdx2) ? "key" : "";
+    const name = lang==="tc" ? s[0] : s[1];
+    const rd   = lang==="tc" ? s[2] : s[2];
+    return `<li class="${key}">${name} <span class="rd">· ${rd}</span></li>`;
+  }).join("");
+  $("stops-out").innerHTML = build(STOPS_OUT, 13, 14);  // Fu Tai Estate + Port
+  $("stops-in").innerHTML  = build(STOPS_IN, 0, 1);     // Port + Fu Tai Shopping Centre
+}
+
+/* ============================================================
+   6. Boot
+   ============================================================ */
+function renderAll(){ renderStatic(); renderTabs(); renderTimetable(); renderStops(); }
+
+$("lang-tc").addEventListener("click", ()=>{ state.lang="tc"; renderAll(); loadLive(); });
+$("lang-en").addEventListener("click", ()=>{ state.lang="en"; renderAll(); loadLive(); });
+$("refresh").addEventListener("click", loadLive);
+
+renderAll();
+tickClock();
+setInterval(tickClock, 1000);
+loadLive();
+setInterval(loadLive, 30000);        // official data refreshes about every 30s
+setInterval(renderTimetable, 60000); // move the "next bus" highlight along
+
+/* ============================================================
+   7. Installable app (PWA)
+   ============================================================ */
+const installBtn = $("install");
+const standalone = window.matchMedia("(display-mode: standalone)").matches
+                || window.navigator.standalone === true;
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if(!standalone) installBtn.hidden = false;
+});
+
+installBtn.addEventListener("click", async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  try { await deferredPrompt.userChoice; } catch(_) {}
+  deferredPrompt = null;
+  installBtn.hidden = true;
+});
+
+window.addEventListener("appinstalled", () => {
+  installBtn.hidden = true;
+  $("install-hint").hidden = true;
+});
+
+/* iPhone / iPad Safari has no install prompt, so show a short how-to */
+(function iosHint(){
+  const ua = navigator.userAgent;
+  const iOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes("Macintosh") && "ontouchend" in document);
+  const safari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Android/.test(ua);
+  let dismissed = false;
+  try { dismissed = localStorage.getItem("b3a-hint-dismissed") === "1"; } catch(_) {}
+  if(iOS && safari && !standalone && !dismissed) $("install-hint").hidden = false;
+
+  $("install-hint-x").addEventListener("click", () => {
+    $("install-hint").hidden = true;
+    try { localStorage.setItem("b3a-hint-dismissed", "1"); } catch(_) {}
+  });
+})();
+
+/* offline app shell — needs an http(s) origin, so skip when opened as a file */
+if("serviceWorker" in navigator && location.protocol !== "file:"){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
